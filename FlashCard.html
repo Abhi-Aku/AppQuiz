@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+.quiz-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#progress-bar {
+    width: 100%;
+    background: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 20px;
+   
+}
+
+#progress {
+    height: 25px;
+    background: #76c7c0;
+    width: 0;
+}
+#progress b {
+    line-height:25px;
+    margin-left: 20px;
+}
+
+.btn-container {
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.btn {
+    padding: 10px 20px;
+    background: #76c7c0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #5ba9a0;
+}
+
+.correct {
+    background: #a0e0a0;
+}
+
+.wrong {
+    background: #e0a0a0;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Quiz</h1>
+
+        <div id="progress-bar">
+            <div id="progress"><b>0%</b></div>
+        </div>
+
+        <div id="question-container"></div>
+        <div id="answer-buttons" class="btn-container"></div>
+        <button id="next-button" class="btn" onclick="nextQuestion()">Next</button>
+        <div id="result"></div>
+    </div>
+    <script> 
+     let progress = 0;
+const questions = [
+    {
+        question: "What is the capital of France?",
+        answers: [
+            { text: "Berlin", correct: false },
+            { text: "Madrid", correct: false },
+            { text: "Paris", correct: true },
+            { text: "Lisbon", correct: false }
+        ]
+    },
+    {
+        question: "Which planet is known as the Red Planet?",
+        answers: [
+            { text: "Earth", correct: false },
+            { text: "Mars", correct: true },
+            { text: "Jupiter", correct: false },
+            { text: "Saturn", correct: false }
+        ]
+    },
+    {
+        question: "Who wrote 'Hamlet'?",
+        answers: [
+            { text: "Charles Dickens", correct: false },
+            { text: "William Shakespeare", correct: true },
+            { text: "Mark Twain", correct: false },
+            { text: "Leo Tolstoy", correct: false }
+        ]
+    },
+    {
+        question: "What is the largest ocean on Earth?",
+        answers: [
+            { text: "Atlantic Ocean", correct: false },
+            { text: "Indian Ocean", correct: false },
+            { text: "Arctic Ocean", correct: false },
+            { text: "Pacific Ocean", correct: true }
+        ]
+    },
+    {
+        question: "What is the chemical symbol for gold?",
+        answers: [
+            { text: "Au", correct: true },
+            { text: "Ag", correct: false },
+            { text: "Pb", correct: false },
+            { text: "Fe", correct: false }
+        ]
+    }
+];
+
+let currentQuestionIndex = 0;
+let score = 0;
+
+
+function startQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    // document.getElementById('next-button').style.display = 'none';
+    showQuestion(questions[currentQuestionIndex]);
+}
+
+function showQuestion(question) {
+    const questionContainer = document.getElementById('question-container');
+    questionContainer.innerText = question.question;
+
+    const answerButtons = document.getElementById('answer-buttons');
+    answerButtons.innerHTML = '';
+
+    question.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.innerText = answer.text;
+        button.classList.add('btn');
+        button.addEventListener('click', () => selectAnswer(answer));
+        answerButtons.appendChild(button);
+    });
+
+    updateProgressBar();
+}
+
+function selectAnswer(answer) {
+    const resultContainer = document.getElementById('result');
+    if (answer.correct) {
+        score++;
+        resultContainer.innerText = "Correct!";
+    } else {
+        resultContainer.innerText = "Wrong!";
+    }
+    showCorrectAnswer(answer);
+    const answerButtons = document.getElementById('answer-buttons');
+    answerButtons.childNodes.forEach(button => {
+        if (button.innerText === answer.text) {
+            button.classList.add(answer.correct ? 'correct' : 'wrong');
+        }
+    });
+
+    document.getElementById('next-button').style.display = 'block';
+}
+
+function showCorrectAnswer(selectedAnswer) {
+    const answerButtons = document.getElementById('answer-buttons');
+    questions[currentQuestionIndex].answers.forEach(answer => {
+        if (answer.correct) {
+            answerButtons.childNodes.forEach(button => {
+                if (button.innerText === answer.text) {
+                    button.classList.add('correct');
+                }
+            });
+        }
+    });
+}
+
+function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length, progress < 100) {
+        showQuestion(questions[currentQuestionIndex]);
+        document.getElementById('result').innerText = '';
+        // document.getElementById('next-button').style.display = 'none';
+        progress += 25; 
+            document.getElementById('progress').style.width = progress + '%';
+            document.getElementById('progress').innerText = progress + '%';
+ } else {
+        showResults();
+    }
+}
+
+function showResults() {
+    const questionContainer = document.getElementById('question-container');
+    const totalQuestions = questions.length;
+    const incorrectAnswers = totalQuestions - score;
+
+    questionContainer.innerText = `You scored ${score} out of ${totalQuestions}.`;
+    const resultMessage = `Correct: ${score}, Wrong: ${incorrectAnswers}`;
+    
+    document.getElementById('result').innerText = resultMessage;
+
+    const answerButtons = document.getElementById('answer-buttons');
+    answerButtons.innerHTML = '';
+}
+
+function updateProgressBar() {
+    const progress = document.getElementById('progress');
+    progress.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+}
+
+startQuiz();
+
+
+    </script>
+</body>
+</html>
